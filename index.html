@@ -1,0 +1,29 @@
+<h1>Safe Signing Tool</h1>
+
+<script>
+  // Assume EIP712_PAYLOAD is defined elsewhere in your codebase
+
+  window.addEventListener('load', async () => {
+    if (typeof window.ethereum === 'undefined') {
+      console.error('MetaMask is not installed.')
+      return
+    }
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [
+        {
+          chainId: EIP712_PAYLOAD.domain.chainId,
+        },
+      ],
+    })
+    const account = (
+      await window.ethereum.request({ method: 'eth_requestAccounts' })
+    )[0]
+    const signature = await window.ethereum.request({
+      method: 'eth_signTypedData_v4',
+      params: [account, JSON.stringify(EIP712_PAYLOAD)],
+    })
+    document.body.innerHTML +=
+      '<p>Signature: <code>' + signature + '</code></p>'
+  })
+</script>
