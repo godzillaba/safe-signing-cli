@@ -8,7 +8,7 @@ import http from 'http'
   const mode = process.argv[2]
 
   if (mode !== 'sign' && mode !== 'execute') {
-    console.error('Usage: npx signing-cli <sign|execute> ...')
+    console.error('Usage: npx @godzillaba/safe-signing-cli@1.0.0 <sign|execute> ...')
     process.exit(1)
   }
 
@@ -23,7 +23,7 @@ import http from 'http'
     (mode === 'execute' && signatures.length === 0)
   ) {
     console.error(
-      `Usage: npx signing-cli ${mode} <transactionsFile> <safeAddress> <rpcUrl>${mode === 'execute' ? ' <signatureOne> <signatureTwo> ...' : ''}`
+      `Usage: npx @godzillaba/safe-signing-cli@1.0.0 ${mode} <transactionsFile> <safeAddress> <rpcUrl>${mode === 'execute' ? ' <signatureOne> <signatureTwo> ...' : ''}`
     )
     process.exit(1)
   }

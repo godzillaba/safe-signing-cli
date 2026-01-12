@@ -1,10 +1,13 @@
 {
-  "name": "signing-cli",
+  "name": "@godzillaba/safe-signing-cli",
   "version": "1.0.0",
-  "bin": "./dist/index.js",
+  "bin": {
+    "safe-signing-cli": "dist/index.js"
+  },
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node index.ts"
+    "dev": "ts-node index.ts",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "typescript": "5.9.3"
@@ -12,5 +15,11 @@
   "dependencies": {
     "@safe-global/protocol-kit": "6.1.2",
     "ethers": "6.16.0"
-  }
+  },
+  "files": [
+    "./dist/index.js",
+    "index.ts",
+    "package.json",
+    "tsconfig.json"
+  ]
 }
