@@ -1,9 +1,7 @@
 {
   "name": "@godzillaba/safe-signing-cli",
   "version": "1.0.0",
-  "bin": {
-    "safe-signing-cli": "dist/index.js"
-  },
+  "bin": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "dev": "ts-node index.ts",
