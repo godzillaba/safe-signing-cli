@@ -8,7 +8,9 @@ import http from 'http'
   const mode = process.argv[2]
 
   if (mode !== 'sign' && mode !== 'execute') {
-    console.error('Usage: npx @godzillaba/safe-signing-cli@1.0.0 <sign|execute> ...')
+    console.error(
+      'Usage: npx @godzillaba/safe-signing-cli@1.0.0 <sign|execute> ...'
+    )
     process.exit(1)
   }
 
@@ -30,10 +32,40 @@ import http from 'http'
 
   const transactions = await readAndValidateTxFile(transactionsFile)
 
-  const protocolKit = await Safe.init({
-    provider: rpcUrl,
-    safeAddress,
-  })
+  const chainId = await new JsonRpcProvider(rpcUrl)
+    .getNetwork()
+    .then(network => network.chainId)
+
+  let protocolKit: Safe
+  try {
+    protocolKit = await Safe.init({
+      provider: rpcUrl,
+      safeAddress,
+      contractNetworks: {
+        [chainId.toString()]: {
+          multiSendAddress: process.env.CUSTOM_MULTISEND_ADDRESS,
+          multiSendCallOnlyAddress:
+            process.env.CUSTOM_MULTISEND_CALLONLY_ADDRESS,
+        },
+      },
+    })
+  } catch (err: any) {
+    if (err.message === 'Invalid multiSend contract address') {
+      console.error(
+        'Error: Unknown multiSend contract address for the current network. Please set CUSTOM_MULTISEND_ADDRESS'
+      )
+      console.error('Check the official Safe repo for the contract address')
+      process.exit(1)
+    }
+    if (err.message === 'Invalid multiSendCallOnly contract address') {
+      console.error(
+        'Error: Unknown multiSendCallOnly contract address for the current network. Please set CUSTOM_MULTISEND_CALLONLY_ADDRESS'
+      )
+      console.error('Check the official Safe repo for the contract address')
+      process.exit(1)
+    }
+    throw err
+  }
 
   const safeTx = await protocolKit.createTransaction({
     transactions,
