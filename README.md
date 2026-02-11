@@ -1,26 +1,7 @@
-# Gnosis Safe Transaction Signing Utility
+# Transaction Signing Utility
 
-This tool allows users to specify a gnosis safe transaction batch with JSON and sign it in the browser. Signatures can then be collected and executed with this same tool.
+This tool allows users to specify a transaction request and sign+send it in the browser.
 
 ```
-npx @godzillaba/safe-signing-cli@1.1.1
-```
-
-Transaction file sample:
-
-```json
-[
-  {
-    "to": "0x1234567890abcdef1234567890abcdef12345678",
-    "value": "0",
-    "data": "0xabcdef",
-    "operation": 0
-  },
-  {
-    "to": "0x1234567890abcdef1234567890abcdef12345678",
-    "value": "0",
-    "data": "0x112233",
-    "operation": 0
-  }
-]
+npx @godzillaba/signing-cli@1.0.0 <chainId> <to> <value> <data>
 ```
