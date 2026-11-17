@@ -9,7 +9,7 @@ import http from 'http'
 
   if (mode !== 'sign' && mode !== 'execute') {
     console.error(
-      'Usage: npx @godzillaba/safe-signing-cli@1.0.0 <sign|execute> ...'
+      'Usage: npx @godzillaba/safe-signing-cli <sign|execute> ...'
     )
     process.exit(1)
   }
@@ -25,16 +25,24 @@ import http from 'http'
     (mode === 'execute' && signatures.length === 0)
   ) {
     console.error(
-      `Usage: npx @godzillaba/safe-signing-cli@1.0.0 ${mode} <transactionsFile> <safeAddress> <rpcUrl>${mode === 'execute' ? ' <signatureOne> <signatureTwo> ...' : ''}`
+      `Usage: npx @godzillaba/safe-signing-cli ${mode} <transactionsFile> <safeAddress> <rpcUrl>${mode === 'execute' ? ' <signatureOne> <signatureTwo> ...' : ''}`
     )
     process.exit(1)
   }
 
-  const transactions = await readAndValidateTxFile(transactionsFile)
+  const { chainId: fileChainId, transactions } =
+    await readAndValidateTxFile(transactionsFile)
 
   const chainId = await new JsonRpcProvider(rpcUrl)
     .getNetwork()
     .then(network => network.chainId)
+
+  if (chainId !== fileChainId) {
+    console.error(
+      `Error: Transaction file chainId ${fileChainId} does not match RPC chainId ${chainId}`
+    )
+    process.exit(1)
+  }
 
   let protocolKit: Safe
   try {
@@ -222,21 +230,27 @@ import http from 'http'
   }
 
   async function readAndValidateTxFile(filePath: string) {
-    const obj = JSON.parse(await fs.readFile(filePath, 'utf-8'))
+    const file = JSON.parse(await fs.readFile(filePath, 'utf-8'))
     if (
-      !Array.isArray(obj) ||
-      obj.some(
-        tx =>
+      !Array.isArray(file.transactions) ||
+      file.transactions.some(
+        (tx: any) =>
           !ethers.isAddress(tx.to) ||
-          !(parseInt(tx.value) >= 0) ||
-          !ethers.isHexString(tx.data) ||
-          !(tx.operation === 0 || tx.operation === 1)
+          !(BigInt(tx.value) >= 0n) ||
+          !ethers.isHexString(tx.data)
       )
     ) {
       throw new Error(
-        'Transaction file is not valid. Need an array of { to, value, data, operation }'
+        'Transaction file is not valid. Need a Safe Transaction Builder JSON with transactions: [{ to, value, data }]'
       )
     }
-    return obj
+    return {
+      chainId: BigInt(file.chainId),
+      transactions: file.transactions.map((tx: any) => ({
+        to: tx.to,
+        value: tx.value,
+        data: tx.data,
+      })),
+    }
   }
 })()
